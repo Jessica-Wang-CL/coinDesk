@@ -6,7 +6,12 @@
       <div>
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>幣別</mat-label>
-          <input matInput formControlName="currency" required />
+          <input
+            matInput
+            formControlName="currency"
+            (blur)="trimInput('currency')"
+            required
+          />
         </mat-form-field>
       </div>
     </div>
@@ -15,7 +20,12 @@
       <div>
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>中文名稱</mat-label>
-          <input matInput formControlName="chineseName" required />
+          <input
+            matInput
+            formControlName="chineseName"
+            (blur)="trimInput('chineseName')"
+            required
+          />
         </mat-form-field>
       </div>
     </div>

@@ -44,7 +44,6 @@ export class CurrencyComponent implements OnInit {
           codeSet.has(item.currency)
         );
 
-        // 將資料填入表單
         this.setCurrencyList(this.originalCurrencyList);
       });
     });
@@ -91,8 +90,7 @@ export class CurrencyComponent implements OnInit {
     });
   }
 
-  public onEdit(data: any): void {
-    console.log(data);
+  public onEdit(data: CurrencyRate): void {
     this.dialog.open(AddCurrencyDialogComponent, {
       width: '400px',
       data: {
@@ -102,5 +100,5 @@ export class CurrencyComponent implements OnInit {
     });
   }
 
-  public onDel(data: any): void {}
+  public onDel(data: CurrencyRate): void {}
 }
