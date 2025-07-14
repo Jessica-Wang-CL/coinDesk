@@ -1,0 +1,69 @@
+<div class="currency-container">
+  <h2>匯率資訊</h2>
+  <div class="inlineDiv">
+    <div style="display: flex; align-items: center; gap: 5px">
+      <strong>更新時間：</strong>
+      <span id="updated-time">{{ updatedTime }}</span>
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 12px">
+      <button mat-raised-button color="primary" (click)="onFreeze()">
+        凍結
+      </button>
+      <button mat-raised-button (click)="onMaintenance()">維護</button>
+    </div>
+  </div>
+
+  <form [formGroup]="currencyForm">
+    <table class="rate-table">
+      <thead>
+        <tr>
+          <th *ngIf="isEditable">
+            <mat-icon
+              class="add-icon"
+              matTooltip="加入"
+              (click)="onAdd()"
+              style="cursor: pointer"
+            >
+              add
+            </mat-icon>
+          </th>
+          <th>幣別</th>
+          <th>中文名稱</th>
+          <th>匯率</th>
+        </tr>
+      </thead>
+      <tbody formArrayName="currencyList">
+        <tr
+          *ngFor="let item of currencyList.controls; let i = index"
+          [formGroupName]="i"
+        >
+          <td *ngIf="isEditable">
+            <div style="display: flex; align-items: center; gap: 12px">
+              <button mat-raised-button (click)="onEdit(item.value)">
+                編輯
+              </button>
+              <button
+                mat-raised-button
+                color="warn"
+                (click)="onDel(item.value)"
+              >
+                刪除
+              </button>
+            </div>
+          </td>
+          <td>
+            {{ item.get("currency")?.value }}
+          </td>
+          <td>
+            {{ item.get("chineseName")?.value }}
+          </td>
+          <td>
+            {{ item.get("rate")?.value | number : "1.4-4" }}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </form>
+  <p class="update-time">免責申明：{{ disclaimer }}</p>
+</div>

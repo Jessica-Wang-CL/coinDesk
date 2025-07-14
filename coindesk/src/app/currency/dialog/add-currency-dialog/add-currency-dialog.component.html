@@ -1,0 +1,28 @@
+<h2 mat-dialog-title>{{ data.isNew ? "新增" : "編輯" }}幣別</h2>
+<mat-dialog-content>
+  <form [formGroup]="form">
+    <div class="inlineDiv">
+      <p label-required>幣別</p>
+      <div>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>幣別</mat-label>
+          <input matInput formControlName="currency" required />
+        </mat-form-field>
+      </div>
+    </div>
+    <div class="inlineDiv">
+      <p label-required>中文名稱</p>
+      <div>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>中文名稱</mat-label>
+          <input matInput formControlName="chineseName" required />
+        </mat-form-field>
+      </div>
+    </div>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-raised-button color="warn" (click)="onCancel()">取消</button>
+  <button mat-raised-button color="primary" (click)="onSave()">儲存</button>
+</mat-dialog-actions>

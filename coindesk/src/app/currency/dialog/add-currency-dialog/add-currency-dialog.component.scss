@@ -1,0 +1,12 @@
+.inlineDiv {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 0.5rem;
+}
+
+p[label-required]::before {
+  content: " *";
+  color: red;
+  font-weight: bold;
+}
