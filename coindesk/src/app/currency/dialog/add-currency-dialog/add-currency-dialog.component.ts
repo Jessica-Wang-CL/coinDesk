@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { CurrencyService } from 'src/app/service/currency.service';
-import { CurrencyRate } from 'src/app/service/exchange-rate.service';
+import { TransformedCurrency } from 'src/app/service/exchange-rate.service';
 
 @Component({
   selector: 'app-add-currency-dialog',
@@ -18,7 +18,7 @@ export class AddCurrencyDialogComponent implements OnInit {
     private currencyService: CurrencyService,
     private dialogRef: MatDialogRef<AddCurrencyDialogComponent>,
     @Inject(MAT_DIALOG_DATA)
-    public data: { isNew: boolean; editCurrency: CurrencyRate }
+    public data: { isNew: boolean; editCurrency: TransformedCurrency, originalCurrencyList: TransformedCurrency[] }
   ) {}
 
   ngOnInit(): void {
@@ -26,10 +26,16 @@ export class AddCurrencyDialogComponent implements OnInit {
   }
 
   private initData(): void {
-    this.form = this.fb.group({
-      currency: [this.data.isNew ? '' : this.data.editCurrency.currency],
-      chineseName: [this.data.isNew ? '' : this.data.editCurrency.chineseName],
-    });
+  const isNew = this.data.isNew;
+  const editCurrency = this.data.editCurrency;
+
+  this.form = this.fb.group({
+    currency: [{
+      value: isNew ? '' : editCurrency.currency,
+      disabled: !isNew
+    }],
+    chineseName: [isNew ? '' : editCurrency.chineseName],
+  });
   }
 
   public trimInput(controlName: string): void {
@@ -42,17 +48,38 @@ export class AddCurrencyDialogComponent implements OnInit {
   public onSave(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
-      this.showWarning();
+      this.showWarning('請將必填欄位填好！');
       return;
     }
+
+    const currencyValue = this.form.get('currency')?.value;
+    const isDuplicated = this.data.originalCurrencyList.some(item => item.currency === currencyValue)
+    if (this.data.isNew && isDuplicated) {
+      this.showWarning('設定重複幣別請修正!');
+      return;
+    }
+
+    this.currencyService.createOrUpdate(this.form.getRawValue()).subscribe(() => {
+      this.showSuccess();
+      this.dialogRef.close();
+    });
   }
 
   public onCancel(): void {
     this.dialogRef.close();
   }
 
-  private showWarning(): void {
-    this.snackBar.open('請將必填欄位填好！', '關閉', {
+  private showSuccess(): void {
+      this.snackBar.open('儲存成功！', '關閉', {
+      duration: 3000,
+      panelClass: ['success-snackbar'], // 可自訂樣式
+      horizontalPosition: 'right',
+      verticalPosition: 'top',
+    });
+  }
+
+  private showWarning(text: string): void {
+    this.snackBar.open(text, '關閉', {
       duration: 3000,
       panelClass: [], // 自訂警告樣式
       horizontalPosition: 'right',

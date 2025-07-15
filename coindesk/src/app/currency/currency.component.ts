@@ -2,12 +2,14 @@ import { Component, OnInit } from '@angular/core';
 import { Currency } from '../model/currency.interface';
 import { CurrencyService } from '../service/currency.service';
 import {
-  CurrencyRate,
+  TransformedCurrency,
   ExchangeRateService,
 } from '../service/exchange-rate.service';
 import { FormArray, FormBuilder, FormGroup } from '@angular/forms';
 import { AddCurrencyDialogComponent } from './dialog/add-currency-dialog/add-currency-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { ConfirmDialogComponent } from './dialog/confirm-dialog/confirm-dialog.component';
 
 @Component({
   selector: 'app-currency',
@@ -18,14 +20,15 @@ export class CurrencyComponent implements OnInit {
   currencyForm!: FormGroup;
   updatedTime = '';
   disclaimer = '';
-  originalCurrencyList: CurrencyRate[] = [];
+  originalCurrencyList: TransformedCurrency[] = [];
   isEditable = false;
 
   constructor(
     private fb: FormBuilder,
     private currencyService: CurrencyService,
     private exchangeRateService: ExchangeRateService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private snackBar: MatSnackBar,
   ) {}
 
   ngOnInit(): void {
@@ -35,14 +38,18 @@ export class CurrencyComponent implements OnInit {
 
   private initData(): void {
     this.currencyService.getAllCurrencies().subscribe((res: Currency[]) => {
-      const codeSet = new Set(res.map((item) => item.code));
-
-      this.exchangeRateService.getTransformedRates().subscribe((data) => {
+       this.exchangeRateService.getTransformedRates().subscribe((data) => {
         this.updatedTime = data.updatedTime;
         this.disclaimer = data.disclaimer;
-        this.originalCurrencyList = data.currencyList.filter((item) =>
-          codeSet.has(item.currency)
-        );
+        this.originalCurrencyList = res.map(c => {
+          const matchingRate = data.currencyList.find(item => item.currency === c.code);
+
+          return {
+            currency: c.code,
+            chineseName: c.chineseName,
+            rate: matchingRate ? matchingRate.rate : null
+          } as TransformedCurrency;
+        });
 
         this.setCurrencyList(this.originalCurrencyList);
       });
@@ -59,7 +66,7 @@ export class CurrencyComponent implements OnInit {
     return this.currencyForm.get('currencyList') as FormArray;
   }
 
-  private setCurrencyList(data: CurrencyRate[]) {
+  private setCurrencyList(data: TransformedCurrency[]) {
     this.currencyList.clear();
     data.forEach((item) => {
       this.currencyList.push(
@@ -81,24 +88,57 @@ export class CurrencyComponent implements OnInit {
   }
 
   public onAdd(): void {
-    this.dialog.open(AddCurrencyDialogComponent, {
+    const dialogRef = this.dialog.open(AddCurrencyDialogComponent, {
       width: '400px',
       data: {
         isNew: true,
         editCurrency: null,
+        originalCurrencyList: this.originalCurrencyList,
       },
+    });
+    dialogRef.afterClosed().subscribe(()=> {
+      this.initData();
     });
   }
 
-  public onEdit(data: CurrencyRate): void {
-    this.dialog.open(AddCurrencyDialogComponent, {
+  public onEdit(data: TransformedCurrency): void {
+    const dialogRef = this.dialog.open(AddCurrencyDialogComponent, {
       width: '400px',
       data: {
         isNew: false,
         editCurrency: data,
+        originalCurrencyList: [],
       },
+    });
+    dialogRef.afterClosed().subscribe(()=> {
+      this.initData();
     });
   }
 
-  public onDel(data: CurrencyRate): void {}
+  public onDel(data: TransformedCurrency): void {
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '350px',
+      data: {
+        title: '確認刪除',
+        customContent: `確定要刪除幣別 <b>${data.chineseName}</b> 嗎？`
+      }
+    });
+     dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        this.currencyService.deleteCurrency(data.currency).subscribe(() => {
+          this.showDeleteSuccess();
+          this.initData();
+        })
+      }
+     })
+  }
+
+  private showDeleteSuccess(): void {
+    this.snackBar.open('刪除成功！', '關閉', {
+      duration: 3000,
+      panelClass: ['delete-snackbar'], // 可自訂樣式
+      horizontalPosition: 'right',
+      verticalPosition: 'top',
+    });
+  }
 }

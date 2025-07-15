@@ -10,3 +10,9 @@ p[label-required]::before {
   color: red;
   font-weight: bold;
 }
+
+.mat-snack-bar-container.success-snackbar {
+  background-color: #4caf50 !important;
+  color: white !important;
+  font-weight: bold;
+}

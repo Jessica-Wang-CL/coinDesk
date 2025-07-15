@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
-export interface CurrencyRate {
+export interface TransformedCurrency {
   currency: string;
   chineseName: string;
   rate: number;
@@ -11,7 +11,7 @@ export interface CurrencyRate {
 export interface TransformedResponse {
   updatedTime: string;
   disclaimer: string;
-  currencyList: CurrencyRate[];
+  currencyList: TransformedCurrency[];
 }
 
 @Injectable({

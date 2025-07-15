@@ -14,9 +14,10 @@ import { AddCurrencyDialogComponent } from './currency/dialog/add-currency-dialo
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { ConfirmDialogComponent } from './currency/dialog/confirm-dialog/confirm-dialog.component';
 
 @NgModule({
-  declarations: [AppComponent, CurrencyComponent, AddCurrencyDialogComponent],
+  declarations: [AppComponent, CurrencyComponent, AddCurrencyDialogComponent, ConfirmDialogComponent],
   imports: [
     BrowserModule,
     MatButtonModule,
